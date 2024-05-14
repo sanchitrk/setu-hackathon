@@ -1,0 +1,28 @@
+---
+availableSecrets:
+  secretManager:
+    -
+      env: MONGODB_PWD
+      versionName: projects/serengeti-development/secrets/sunburstdev-db-pwd/versions/latest
+steps:
+  -
+    args:
+      - "-c"
+      - |-
+          gcloud functions deploy fn-aa-fiready \
+          --region asia-south1 \
+          --entry-point run_pub_sub \
+          --memory 512MB \
+          --runtime python38 \
+          --max-instances 3 \
+          --timeout 300s \
+          --trigger-resource pub-aa-fi-ready \
+          --trigger-event google.pubsub.topic.publish \
+          --source . \
+          --ingress-settings all \
+          --set-env-vars MONGODB_PWD=$$MONGODB_PWD
+    entrypoint: bash
+    id: "Set Env & Deploy Function"
+    name: gcr.io/cloud-builders/gcloud
+    secretEnv:
+      - MONGODB_PWD
